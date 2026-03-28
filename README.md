@@ -72,7 +72,7 @@ Cursor does not expose chat token metrics to extensions; **`--brief`** is meant 
 
 ### Anthropic API rate line (BYOK / API key)
 
-Claude Code’s **5h / 7d** percentages come from **Claude Code’s** statusline JSON, not from the public API. In Cursor, this package can show **Messages API rate-limit headers** instead (not Cursor subscription usage):
+Claude Code’s **5h / 7d** percentages come from **Claude Code’s** statusline JSON, not from the public API. This package can print **Messages API rate-limit headers** from any shell (**not** Cursor subscription usage):
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -80,9 +80,13 @@ ai-dev-exp anthropic-rate-brief
 ai-dev-exp anthropic-rate-brief --format json
 ```
 
-Optional **Cursor status bar:** if you use **Cursor** (not plain VS Code), you can load the small add-on under `editors/cursor-anthropic-rate/` via **Cursor → Extensions → Install from Folder** (or build a `.vsix` with the VS Code packaging tool if you use that workflow). It re-runs `anthropic-rate-brief` on an interval (each refresh uses one small Haiku request). **If you prefer not to install any extension**, run `ai-dev-exp anthropic-rate-brief` from a terminal, a shell alias, or a **Task** when you want a reading—same data, no status bar.
+**Terminal (default):** use your system terminal, **PyCharm’s terminal**, a shell alias, `cron`, or CI—whatever runs `ai-dev-exp` with the key in the environment.
 
-See the **`usage-limits`** Cursor skill for the full Claude vs Cursor vs API picture.
+**PyCharm:** **Settings → Tools → External Tools** (or a **Run/Debug** configuration) can run the same command; ensure **`ANTHROPIC_API_KEY`** is set in the tool env or in the IDE’s environment.
+
+**Optional editor status bar (Cursor or VS Code):** load `editors/cursor-anthropic-rate/` via **Install from Folder** / `.vsix` if you use those editors; it polls the same CLI on an interval.
+
+See the **`usage-limits`** skill for Claude vs API vs Cursor billing.
 
 ## Development
 
