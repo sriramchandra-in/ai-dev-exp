@@ -45,6 +45,30 @@ ai-dev-exp install checkin
 ai-dev-exp install token-optimization --cursor
 ```
 
+### Cursor context snapshot (codex-tree)
+
+For repos that use **codex-tree**, you can print **measurable** context-strategy numbers (tree vs raw vs Cursor digest). This does **not** read Cursor chat token usage; it runs `codex-tree check` and `codex-tree report`.
+
+```bash
+cd /path/to/your/repo   # git root with .codex-tree/
+
+# End-of-session or checkpoint (multi-line, paste into notes or chat)
+ai-dev-exp cursor-context
+
+# One line — quick check, log line, or manual status-bar text in Cursor
+ai-dev-exp cursor-context --brief
+
+# JSON for scripts or dashboards
+ai-dev-exp cursor-context --format json
+
+# Another project root
+ai-dev-exp cursor-context --path ~/projects/my-app --brief
+```
+
+Requires **`codex-tree` on `PATH`** and a **`.codex-tree/`** directory (see the **checkin** skill).
+
+Cursor does not expose chat token metrics to extensions; **`--brief`** is meant to be run from the integrated terminal (or a Task) and pasted or glanced at—there is no automatic status-bar hook from this package alone.
+
 ## Development
 
 ```bash

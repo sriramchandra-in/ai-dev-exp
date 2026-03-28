@@ -16,6 +16,8 @@ This skill is **host-agnostic**: it applies to any coding agent with repo access
 
 **Packaging:** Maintained in **ai-dev-exp** at `cursor/skills/token-optimization/`. Install into a target repo with `ai-dev-exp install --cursor` (all Cursor skills) or `ai-dev-exp install token-optimization --cursor`, or copy this directory into that project’s `.cursor/skills/token-optimization/`. Keep the **workspace root** on the codebase you are editing so paths and `.codex-tree/` resolve correctly.
 
+**Measuring context strategy (not chat tokens):** With **codex-tree** on `PATH`, run `ai-dev-exp cursor-context` (full summary), `ai-dev-exp cursor-context --brief` (one line), or `--format json` from the repo root for staleness + estimated savings vs raw source.
+
 ## Cursor
 
 Use Cursor’s **native code citations** (path + line range) when quoting existing code. Run terminal commands from the integrated terminal when the workflow below references the shell.

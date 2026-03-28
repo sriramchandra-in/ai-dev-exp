@@ -1,8 +1,12 @@
 """CLI entry point for ai-dev-exp."""
 
+import json
+from pathlib import Path
+
 import click
 
 from ai_dev_exp import __version__
+from ai_dev_exp.cursor_context import format_brief, format_report_text, gather_snapshot
 from ai_dev_exp.skills import AVAILABLE_SKILLS, CURSOR_SKILLS
 
 
@@ -57,3 +61,40 @@ def install(skill_name: str | None, target: str | None, cursor: bool) -> None:
 
     registry[skill_name].install(target)
     click.echo(f"Installed: {skill_name}")
+
+
+@main.command("cursor-context")
+@click.option(
+    "--path",
+    "project_path",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=Path("."),
+    help="Git project root (contains .codex-tree when using codex-tree).",
+)
+@click.option(
+    "--format",
+    "out_fmt",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default=True,
+    help="text: human summary; json: machine-readable snapshot.",
+)
+@click.option(
+    "--brief",
+    is_flag=True,
+    help="One line only (terminal status, Cursor status bar text, quick paste).",
+)
+def cursor_context(project_path: Path, out_fmt: str, brief: bool) -> None:
+    """Snapshot codex-tree staleness + token estimates (Cursor-focused).
+
+    Measures repo context strategy (tree vs digest vs raw), not Cursor chat usage.
+    Requires `codex-tree` on PATH and a `.codex-tree/` directory.
+    """
+    snap = gather_snapshot(project_path)
+    if out_fmt == "json":
+        click.echo(json.dumps(snap, indent=2))
+        return
+    if brief:
+        click.echo(format_brief(snap))
+        return
+    click.echo(format_report_text(snap))
