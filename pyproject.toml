@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-dev-exp"
+version = "0.1.0"
+description = "AI developer experience skills — GitHub, deployment, and codebase checkin skills for AI coding assistants"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Institute of Sri Ramchandra Consciousness" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "click>=8.0",
+    "httpx>=0.27",
+    "pygithub>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+ai-dev-exp = "ai_dev_exp.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sriramchandra-in/ai-dev-exp"
+Repository = "https://github.com/sriramchandra-in/ai-dev-exp"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_dev_exp"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
