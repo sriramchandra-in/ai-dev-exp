@@ -8,6 +8,8 @@ name: deployment
 description: >-
   Deployment orchestration: CI/CD triggers, environment management,
   health checks, and rollback for AI coding assistants.
+  Supports Hostinger VPS (Docker) and GoDaddy (shared hosting).
+argument-hint: "[hostinger | godaddy | --manual | --rollback]"
 ---
 
 # Deployment
@@ -17,36 +19,77 @@ description: >-
 When the user asks to deploy, check deployment status, manage environments,
 or roll back a release.
 
-## Capabilities
+## Platform: Hostinger VPS (Docker + GitHub Actions)
 
-### Deploy
-- Trigger deployments via CI/CD (GitHub Actions, etc.)
-- Promote builds between environments (dev → staging → production)
-- Tag releases with semantic versioning
+### Architecture
+- Docker Compose on a VPS (typically at `/opt/<project>`)
+- GitHub Actions CI/CD: push to main → test → SSH deploy
+- Stack: Django/Wagtail + PostgreSQL + Nginx (or similar)
+- SSL via Let's Encrypt / Certbot
 
-### Monitor
-- Check deployment health and status
-- Verify endpoints after deployment
-- Monitor CI/CD pipeline progress
+### Default deploy (CI/CD)
+1. Ensure all changes are committed on the current feature branch
+2. Run tests locally: `python manage.py test`
+3. Switch to main: `git checkout main`
+4. Merge the feature branch: `git merge <branch>`
+5. Push to GitHub: `git push origin main`
+6. GitHub Actions: test → SSH into VPS → pull → rebuild → migrate → collectstatic
+7. Monitor: `gh run list --workflow=deploy.yml`
 
-### Rollback
-- Identify the last known good deployment
-- Execute rollback to previous version
-- Verify rollback success
+### Manual deploy (--manual)
+1. SSH into VPS: `ssh <user>@<host>`
+2. Run: `cd /opt/<project> && ./scripts/deploy.sh`
+   Or manually:
+   ```bash
+   cd /opt/<project>
+   git pull origin main
+   docker compose -f docker-compose.prod.yml build
+   docker compose -f docker-compose.prod.yml up -d
+   docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
+   docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+   ```
 
-### Environment Management
-- List available environments and their current versions
-- Compare versions across environments
-- Check environment configuration
+### Rollback (--rollback)
+1. Find previous good commit: `git log --oneline -10`
+2. SSH into VPS
+3. Checkout previous commit: `git checkout <sha>`
+4. Rebuild: `docker compose -f docker-compose.prod.yml up -d --build`
+5. Run migrations if needed
 
-## Workflow
+### Post-deploy verification
+- Check the site loads: `curl -s -o /dev/null -w "%{http_code}" https://<domain>`
+- Check admin panel: `https://<domain>/admin/`
+- Check Docker health: `docker compose -f docker-compose.prod.yml ps`
 
-1. **Confirm target** — Which environment? Which version/branch? Always confirm
-   production deployments explicitly.
-2. **Pre-flight checks** — Verify: tests passing, no blocking PRs, dependencies resolved.
-3. **Execute** — Trigger the deployment via the appropriate CI/CD mechanism.
-4. **Verify** — Check health endpoints, monitor logs for errors, confirm rollout.
-5. **Report** — Provide deployment summary with version, environment, and status.
+### Required GitHub Secrets
+- `VPS_HOST` — IP address or hostname
+- `VPS_USER` — SSH username
+- `VPS_SSH_KEY` — private SSH key
+- `VPS_PORT` — SSH port (usually 22)
+
+## Platform: GoDaddy (Shared Hosting)
+
+> **Status: Placeholder** — details to be added when GoDaddy deployment is configured.
+
+### Expected architecture
+- Shared hosting (no Docker, no SSH root)
+- FTP/SFTP or Git-based deployment
+- PHP or static site hosting
+- cPanel-based management
+
+### When details are available, document:
+- Deployment method (FTP, Git push, cPanel API)
+- Credentials / secrets needed
+- Build steps (if any)
+- Post-deploy verification URLs
+
+## Pre-deploy checklist
+
+Before deploying to any platform:
+- [ ] Tests pass locally
+- [ ] All migrations are committed
+- [ ] No uncommitted changes on main
+- [ ] Fixtures are up to date (if applicable)
 
 ## Safety
 
@@ -54,14 +97,22 @@ or roll back a release.
 - Always suggest staging deployment first if available
 - Check for pending database migrations before deploying
 - Maintain rollback capability — know the previous version before deploying
+- For Hostinger: verify Docker containers are healthy after deploy
+- For GoDaddy: verify site loads and no PHP errors
 
 ## Tools
 
-Prefer CI/CD native tools:
 ```bash
-gh workflow run deploy.yml -f environment=staging -f version=v1.2.3
+# GitHub Actions
+gh workflow run deploy.yml -f environment=production
 gh run list --workflow=deploy.yml
-gh release create v1.2.3 --generate-notes
+gh run view <run-id> --log
+
+# Docker health (Hostinger)
+ssh <user>@<host> 'docker compose -f docker-compose.prod.yml ps'
+
+# Quick site check
+curl -s -o /dev/null -w "%{http_code}" https://<domain>
 ```
 """
 
@@ -73,7 +124,7 @@ class DeploymentSkill(Skill):
 
     @property
     def description(self) -> str:
-        return "Deployment orchestration: CI triggers, environment management, rollback"
+        return "Deployment orchestration: Hostinger VPS (Docker) and GoDaddy (shared hosting)"
 
     def skill_markdown(self) -> str:
         return SKILL_MD
