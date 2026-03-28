@@ -96,7 +96,19 @@ These commands are available when `codex-tree` is installed:
 | `codex-tree update` | Incremental delta from git changes |
 | `codex-tree regen` | Full rebuild (new generation, increments counter) |
 | `codex-tree check` | Staleness report (clean vs stale files) |
-| `codex-tree report` | Token savings and tree statistics |
+| `codex-tree report` | Estimated tokens: raw vs tree vs tree+cursor digest |
+
+### `codex-tree report` output
+
+Text mode prints **context strategies** (heuristic token estimates vs reading all indexed source):
+
+- **Nothing (raw source only)** — baseline; no codex-tree context.
+- **Just tree** — `tree.json` + all `modules/**/index.json`.
+- **Tree + Cursor** — just tree plus `cursor/l2.md` (or `l1.md` if L2 missing).
+
+Each line includes **% vs raw** (savings vs baseline). JSON (`--format json`) exposes
+`token_estimate.just_tree_tokens`, `tree_plus_cursor_tokens`, `cursor_digest_used`,
+`savings_just_tree`, `savings_tree_plus_cursor`, plus legacy module-only fields.
 
 ### Flags by command
 
@@ -118,7 +130,8 @@ These commands are available when `codex-tree` is installed:
 - `--fail-if-stale` — exit code 1 if any files are stale (useful in CI)
 
 **report:**
-- `--format json` — machine-readable output
+- `--format json` — machine-readable output (includes multi-strategy `token_estimate`)
+- `-q/--quiet` — suppresses report text (useful when only exit status matters)
 
 **Global:** `--path <dir>` (default: `.`), `-v/--verbose`, `-q/--quiet`
 
