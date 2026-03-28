@@ -1,11 +1,12 @@
 ---
 name: token-optimization
 description: >-
-  Reduces tokens and API cost via shallow context, codex-tree digests, prompt
-  caching patterns, model tiering, batch vs sync calls, output caps, semantic
-  cache discipline, and request aggregation. Use when the user mentions tokens,
-  context limits, budget, cost, caching, batch API, model choice, or keeping
-  sessions small; or before pulling large files or redundant text into context.
+  Reduces tokens and API cost via shallow context, context-window compaction,
+  codex-tree digests, prompt caching patterns, model tiering, batch vs sync
+  calls, output caps, semantic cache discipline, and request aggregation. Use
+  when the user mentions tokens, context limits, compaction, budget, cost,
+  caching, batch API, model choice, or keeping sessions small; or before pulling
+  huge transcripts, files, or redundant text into context.
 ---
 
 # Token optimization
@@ -28,6 +29,17 @@ Use Cursor’s **native code citations** (path + line range) when quoting existi
 - Topics: prompt caching, batch API, model tiering, semantic cache, aggregation, output limits.
 - Session is long, or many large files are in scope.
 - You are about to read, paste, or repeat large blobs without a clear need.
+- Context feels full, repetitive, or dominated by already-resolved work.
+
+## Context window compaction
+
+**When appropriate**, shrink what stays in the active window—do not wait for the user to hit a hard limit.
+
+- **Proactively offer** compaction when: many turns of settled decisions, huge logs or diffs still in thread, a **topic pivot**, or the next step only needs a short **handoff** (open tasks, key paths, last commands).
+- **Summarize** into a tight block: current goal, constraints, files touched, unresolved questions. Drop obsolete tool output and duplicate code pastes from the narrative (keep citations to paths, not full re-quotes).
+- **Host affordances:** If the product exposes **compact** / **summarize thread** / **clear** (e.g. Claude Code-style compaction), **suggest using it** at natural breakpoints; then continue from the summary only.
+- **New scope → new chat** when the old thread is mostly unrelated; carry over only a one-paragraph brief.
+- After compaction, **avoid re-ingesting** the same large blobs unless the task requires it.
 
 ## Defaults (in order)
 
@@ -74,6 +86,7 @@ For stale files from `codex-tree check`, read **raw source** for those paths. Fo
 
 ## Checklist (quick)
 
+- [ ] Compaction or handoff summary offered when the thread is long or pivoting?
 - [ ] Smallest digest or search path tried first?
 - [ ] Stable-vs-volatile prompt layout respects caching if API calls are in play?
 - [ ] Model tier matches task risk and ambiguity?

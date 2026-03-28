@@ -19,6 +19,13 @@ Bundled with **ai-dev-exp** at `cursor/skills/token-optimization/`. Optional dep
 - Re-read only what drifted; do not re-ingest unchanged files between turns.
 - When delegating to subagents or subprocesses: minimal specs; require **summarized** returns, not raw dumps.
 
+## Context compaction (session detail)
+
+- **Cadence:** After a milestone (feature done, tests green, PR ready), offer a **one-screen summary** and optional **host compact/clear** so the next segment starts lean.
+- **Claude Code–style clients:** User may run `/compact` or equivalent; your job is to **name the breakpoint** and **produce the summary text** they can keep after compaction.
+- **IDE chats without compact:** You still **self-compact** in replies—shorter turns, no repeat of long stderr, pointer to “see summary above.”
+- **Risk:** Do not compact away **safety constraints**, **unmerged blockers**, or **exact versions** the user still needs; put those in the summary explicitly.
+
 ## Skills and rules
 
 - Load skills that match the task; avoid unrelated skill text.
