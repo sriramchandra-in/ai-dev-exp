@@ -6,6 +6,7 @@ from pathlib import Path
 import click
 
 from ai_dev_exp import __version__
+from ai_dev_exp.anthropic_rate import build_snapshot, format_brief_line
 from ai_dev_exp.cursor_context import format_brief, format_report_text, gather_snapshot
 from ai_dev_exp.skills import AVAILABLE_SKILLS, CURSOR_SKILLS
 
@@ -98,3 +99,24 @@ def cursor_context(project_path: Path, out_fmt: str, brief: bool) -> None:
         click.echo(format_brief(snap))
         return
     click.echo(format_report_text(snap))
+
+
+@main.command("anthropic-rate-brief")
+@click.option(
+    "--format",
+    "out_fmt",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default=True,
+)
+def anthropic_rate_brief(out_fmt: str) -> None:
+    """One line from Anthropic API rate-limit headers (BYOK / API key).
+
+    Not Claude Code 5h/7d windows and not Cursor subscription usage.
+    Sends a minimal Messages request (default Haiku). Requires ANTHROPIC_API_KEY.
+    """
+    snap = build_snapshot()
+    if out_fmt == "json":
+        click.echo(json.dumps(snap, indent=2))
+        return
+    click.echo(format_brief_line(snap))

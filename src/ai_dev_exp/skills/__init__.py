@@ -38,6 +38,11 @@ CURSOR_SKILLS: dict[str, Skill] = {
         "Token/API cost optimization: context, caching, batching, codex-tree, aggregation.",
         variant="cursor",
     ),
+    "usage-limits": FileBackedSkill(
+        "usage-limits",
+        "Claude vs Cursor usage: API rate line, status bar extension, 5h/7d limits explained.",
+        variant="cursor",
+    ),
 }
 
 __all__ = ["AVAILABLE_SKILLS", "CURSOR_SKILLS", "Skill"]

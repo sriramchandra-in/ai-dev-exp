@@ -19,6 +19,7 @@ def test_cursor_skills_registered():
     assert "github" in CURSOR_SKILLS
     assert "deployment" in CURSOR_SKILLS
     assert "token-optimization" in CURSOR_SKILLS
+    assert "usage-limits" in CURSOR_SKILLS
 
 
 def test_skills_are_skill_instances():
@@ -66,7 +67,10 @@ def test_install_cursor_writes_dot_cursor(tmp_path: Path):
     assert (tmp_path / ".cursor" / "skills" / "token-optimization" / "reference.md").is_file()
 
 
-@pytest.mark.parametrize("name", ["checkin", "github", "deployment", "token-optimization"])
+@pytest.mark.parametrize(
+    "name",
+    ["checkin", "github", "deployment", "token-optimization", "usage-limits"],
+)
 def test_cursor_skill_install_roundtrip(tmp_path: Path, name: str):
     skill = CURSOR_SKILLS[name]
     skill.install(str(tmp_path))

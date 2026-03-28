@@ -21,6 +21,7 @@ For convenience in this repo, **`.claude/skills/`** and **`.cursor/skills/`** ar
 | **github** | yes | yes |
 | **deployment** | yes | yes |
 | **token-optimization** | — | yes |
+| **usage-limits** | — | yes |
 
 ## Installation
 
@@ -68,6 +69,20 @@ ai-dev-exp cursor-context --path ~/projects/my-app --brief
 Requires **`codex-tree` on `PATH`** and a **`.codex-tree/`** directory (see the **checkin** skill).
 
 Cursor does not expose chat token metrics to extensions; **`--brief`** is meant to be run from the integrated terminal (or a Task) and pasted or glanced at—there is no automatic status-bar hook from this package alone.
+
+### Anthropic API rate line (BYOK / API key)
+
+Claude Code’s **5h / 7d** percentages come from **Claude Code’s** statusline JSON, not from the public API. In Cursor, this package can show **Messages API rate-limit headers** instead (not Cursor subscription usage):
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+ai-dev-exp anthropic-rate-brief
+ai-dev-exp anthropic-rate-brief --format json
+```
+
+Optional **status bar:** install the extension under `editors/cursor-anthropic-rate/` (open folder in Cursor → **Run → Install Extension from Location**, or package with `vsce` and install the `.vsix`). It re-runs `anthropic-rate-brief` on an interval (each refresh uses one small Haiku request).
+
+See the **`usage-limits`** Cursor skill for the full Claude vs Cursor vs API picture.
 
 ## Development
 
