@@ -8,6 +8,7 @@ Canonical skill markdown lives in two trees at the **repository root** (not only
 
 - **`claude/skills/<name>/SKILL.md`** — Claude Code / Anthropic-oriented copy (e.g. codex-tree **claude/** digest first in checkin).
 - **`cursor/skills/<name>/SKILL.md`** — Cursor-oriented copy (e.g. codex-tree **cursor/** digest first; extra host notes where useful).
+- **`cursor/commands/*.md`** — Cursor slash / palette commands for this repo (e.g. **`usage-status`**). **`.cursor/commands/`** symlinks here, like skills.
 
 The **`token-optimization`** skill exists **only** under `cursor/skills/` (installs with `--cursor`).
 
@@ -64,6 +65,15 @@ ai-dev-exp cursor-context --path ~/projects/my-app --brief
 ```
 
 See **`usage-limits`** in the Cursor skill bundle for a short summary.
+
+### Cursor plan usage (browser only)
+
+This repo does **not** read Cursor subscription data (no API keys or session tokens in scripts).
+
+- **Script:** `scripts/open-cursor-usage.sh` — opens `https://cursor.com/settings` in your default browser (`xdg-open` / `open`). Optional: `CURSOR_USAGE_URL=...` to override.
+- **Command:** open this repo in Cursor and run **`usage-status`** — the agent runs that script from the repo root.
+
+To use **`usage-status`** in other projects, copy or symlink `cursor/commands/usage-status.md` into that project’s `.cursor/commands/` and ensure `scripts/open-cursor-usage.sh` is available at the path the command uses (or adjust the command to point at a copy under `$HOME/.cursor/scripts/`).
 
 ## Development
 

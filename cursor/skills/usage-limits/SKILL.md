@@ -21,6 +21,8 @@ Run from **Cursor’s integrated terminal** or **PyCharm’s terminal** with wor
 
 **Subscription and quota** are only in **Cursor Settings** (billing / usage). No CLI in this bundle reads them.
 
+**Open the account page from the terminal:** from the **ai-dev-exp** repo root, `bash scripts/open-cursor-usage.sh` (public URL only; no credentials in the script). In Cursor, the **`usage-status`** command (`.cursor/commands/usage-status.md`) tells the agent to run that script.
+
 ## When the user asks for numbers
 
 - **Cursor billing** → Cursor Settings.
