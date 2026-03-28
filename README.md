@@ -4,7 +4,7 @@ AI developer experience skills for coding assistants.
 
 ## Skills
 
-- **checkin** — Load a codex-tree knowledge tree into an AI session for instant codebase context
+- **checkin** — Load a codex-tree knowledge tree into an AI session (Cursor and Claude digest layers, optional intent)
 - **github** — GitHub operations: PR management, issue tracking, code review workflows
 - **deployment** — Deployment orchestration: CI triggers, environment management, rollback
 

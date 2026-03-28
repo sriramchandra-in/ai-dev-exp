@@ -9,7 +9,8 @@ SKILL_MD = """\
 name: checkin
 description: >-
   Load the codex-tree knowledge tree into the AI session for instant codebase
-  context. Use at the start of every conversation or when switching projects.
+  context (Claude and Cursor digest layers). Use at the start of every
+  conversation or when switching projects.
 ---
 
 # Checkin
@@ -34,12 +35,28 @@ At the start of any coding session, or when the user switches to a new project d
    - If stale: suggest `codex-tree update` to refresh incrementally.
    - Note stale files for lazy raw-source exploration.
 
-3. **Load context** — Read the appropriate detail level based on the task and model:
-   - Quick tasks / Haiku: load `.codex-tree/claude/l1.md` (~500 tokens)
-   - Implementation / Sonnet: load `.codex-tree/claude/l2.md` (~2,000 tokens)
-   - Architecture / Opus: load `.codex-tree/claude/l3.md` (full detail)
-   - If `claude/` layer doesn't exist (generated with `--no-claude`), fall back to
-     `tree.json` for the overview + key `modules/{path}/index.json` files for detail.
+3. **Load context** — Pick the digest path for the environment, then the depth tier:
+
+   **In Cursor (Chat / Composer / Agent)** — prefer `.codex-tree/cursor/`:
+   - Quick orientation / small edits: `.codex-tree/cursor/l1.md` (~500 tokens of structure + Cursor preamble)
+   - Feature work (public APIs, imports, intent patterns in L2): `cursor/l2.md` (~2,000 tokens)
+   - Refactors / architecture (all symbols, decisions, import/export detail): `cursor/l3.md`
+   - These files mirror the **same structural body** as `claude/l*.md`; only the opening
+     **Cursor usage guide** differs (e.g. `@` file attachment, `.cursor/rules`, when to escalate).
+   - If `cursor/` is missing (e.g. tree built with `--no-cursor`) but `claude/` exists, use
+     `.codex-tree/claude/l1.md` / `l2.md` / `l3.md` instead — content is aligned.
+
+   **In Claude Code / Anthropic clients** — prefer `.codex-tree/claude/`:
+   - Quick tasks / Haiku: `claude/l1.md`
+   - Implementation / Sonnet: `claude/l2.md`
+   - Architecture / Opus: `claude/l3.md`
+   - If `claude/` is missing but `cursor/` exists, use `cursor/l*.md` (skip the preamble if you want only structure).
+
+   **If neither digest exists** — fall back to `tree.json` for overview + key
+   `modules/{path}/index.json` files for detail.
+
+   **No extra API key** is required to read or generate `cursor/` or `claude/`; both are produced
+   locally from the AST tree plus optional cached intent JSON.
 
 4. **Load intent** — If `.codex-tree/intent/` exists, read it for deeper understanding:
    - `intent/decisions.json` — design decisions anchored to specific files/symbols,
@@ -84,14 +101,16 @@ These commands are available when `codex-tree` is installed:
 ### Flags by command
 
 **init / regen:**
-- `--no-intent` — skip AI intent layer (no API key needed)
-- `--no-claude` — skip Claude optimization layer
+- `--no-intent` — skip AI intent layer (no `ANTHROPIC_API_KEY` needed for AST-only trees)
+- `--no-claude` — skip Claude digest layer (`claude/l1.md`–`l3.md`)
+- `--no-cursor` — skip Cursor digest layer (`cursor/l1.md`–`l3.md`; same structure as Claude + Cursor preamble)
 - `--languages <list>` — comma-separated languages to parse (default: all supported)
 - `--dry-run` — show what would be generated without writing (init only)
 
 **update:**
 - `--no-intent` — skip AI intent analysis for changed files
 - `--no-claude` — skip Claude layer regeneration
+- `--no-cursor` — skip Cursor layer regeneration
 - `--no-compact` — skip auto-compaction even if thresholds are met
 
 **check:**
@@ -107,11 +126,14 @@ These commands are available when `codex-tree` is installed:
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `ANTHROPIC_API_KEY` | For intent layer | — | Claude API authentication |
+| `ANTHROPIC_API_KEY` | For intent layer only | — | Claude API authentication (intent JSON). Not used for `claude/` or `cursor/` markdown. |
 | `CODEX_TREE_MODEL` | No | `claude-sonnet-4-20250514` | Model for intent analysis |
 | `CODEX_TREE_BUDGET` | No | Unlimited | Max tokens for intent API calls |
 
-Without `ANTHROPIC_API_KEY`, intent/claude layers are skipped with a warning (not an error).
+There is **no codex-tree integration with a “Cursor API key”** — Cursor digest files are built on disk like Claude’s. Using Cursor’s own in-editor AI is separate (Cursor account / optional BYOK in app settings).
+
+Without `ANTHROPIC_API_KEY`, the **intent** layer is skipped with a warning (not an error).
+`claude/` and `cursor/` still generate without any API key.
 
 ## Tree structure reference
 
@@ -125,10 +147,14 @@ Without `ANTHROPIC_API_KEY`, intent/claude layers are skipped with a warning (no
     decisions.json      #   design decisions with confidence + provenance
     patterns.json       #   cross-cutting patterns
     .cache/             #   content-hash-based cache (avoids redundant API calls)
-  claude/               # Claude-optimized summaries (optional, generated locally)
+  claude/               # Claude-oriented digest (optional, generated locally, no API)
     l1.md               #   ~500 tokens — stats, architecture, entry points, key types
     l2.md               #   ~2K tokens  — L1 + per-module symbols, dependency graph, patterns
     l3.md               #   full detail — L2 + all symbols, full decisions, import/export manifests
+  cursor/               # Same structural digest + Cursor usage preamble (optional, local, no API)
+    l1.md               #   align with claude/l1.md body; front matter + Cursor how-to
+    l2.md               #   align with claude/l2.md
+    l3.md               #   align with claude/l3.md
   deltas/               # Incremental updates (auto-compacted at 10 deltas or 100KB)
 ```
 
@@ -163,7 +189,9 @@ class CheckinSkill(Skill):
 
     @property
     def description(self) -> str:
-        return "Load codex-tree knowledge into AI sessions for instant codebase context"
+        return (
+            "Load codex-tree knowledge into AI sessions (Cursor + Claude digest layers, intent)"
+        )
 
     def skill_markdown(self) -> str:
         return SKILL_MD
