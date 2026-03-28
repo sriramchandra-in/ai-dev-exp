@@ -103,12 +103,15 @@ These commands are available when `codex-tree` is installed:
 Text mode prints **context strategies** (heuristic token estimates vs reading all indexed source):
 
 - **Nothing (raw source only)** — baseline; no codex-tree context.
-- **Just tree** — `tree.json` + all `modules/**/index.json`.
-- **Tree + Cursor** — just tree plus `cursor/l2.md` (or `l1.md` if L2 missing).
+- **Tree only** — `tree.json` + all `modules/**/index.json`.
+- **Tree + Claude** — tree plus `claude/l2.md` (or `l1.md` if L2 missing).
+- **Tree + Cursor** — tree plus `cursor/l2.md` (or `l1.md` if L2 missing).
 
 Each line includes **% vs raw** (savings vs baseline). JSON (`--format json`) exposes
-`token_estimate.just_tree_tokens`, `tree_plus_cursor_tokens`, `cursor_digest_used`,
-`savings_just_tree`, `savings_tree_plus_cursor`, plus legacy module-only fields.
+`token_estimate.just_tree_tokens`, `tree_plus_claude_tokens`, `claude_digest_used`,
+`tree_plus_cursor_tokens`, `cursor_digest_used`,
+`savings_just_tree`, `savings_tree_plus_claude`, `savings_tree_plus_cursor`,
+plus legacy module-only fields.
 
 ### Flags by command
 
