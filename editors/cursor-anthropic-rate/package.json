@@ -2,7 +2,7 @@
   "name": "cursor-anthropic-rate",
   "displayName": "Anthropic API rate (ai-dev-exp)",
   "version": "0.1.0",
-  "description": "Shows ai-dev-exp anthropic-rate-brief on the status bar (BYOK / API key).",
+  "description": "Cursor status bar: runs ai-dev-exp anthropic-rate-brief (BYOK / API key). Install from Cursor; VS Code app not required.",
   "publisher": "sriramchandra-in",
   "engines": {
     "vscode": "^1.80.0"

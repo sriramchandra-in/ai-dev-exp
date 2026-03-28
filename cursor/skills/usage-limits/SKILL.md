@@ -3,7 +3,7 @@ name: usage-limits
 description: >-
   Explains Claude Code vs Cursor usage reporting: Claude Code 5h/7d statusline
   JSON, Anthropic API rate headers for BYOK, Cursor subscription UI, and the
-  ai-dev-exp anthropic-rate-brief CLI plus optional status-bar extension.
+  ai-dev-exp anthropic-rate-brief CLI plus optional Cursor status-bar add-on.
 ---
 
 # Usage limits (Claude Code vs Cursor)
@@ -29,9 +29,9 @@ Cursor **cannot** receive the same statusline JSON as Claude Code unless Anthrop
    ```bash
    ai-dev-exp anthropic-rate-brief --format json
    ```
-4. **Status bar:** Install the local extension from **`ai-dev-exp/editors/cursor-anthropic-rate/`** (`vsce package` / **Install from VSIX**). It refreshes the same CLI text on an interval.
+4. **Cursor status bar (optional):** Install the add-on from **`ai-dev-exp/editors/cursor-anthropic-rate/`** using **Cursor → Extensions → Install from Folder** (Cursor uses the same extension format as VS Code; you do **not** need to use the VS Code app). If the user avoids extensions entirely, use only the CLI / Tasks / shell alias—same numbers, no status bar.
 
-**Cost:** Each refresh sends one minimal Messages API request (Haiku by default). Increase interval if that matters.
+**Cost:** Each probe sends one minimal Messages API request (Haiku by default). Increase the add-on’s refresh interval if that matters.
 
 ## Claude Code workflow (unchanged)
 

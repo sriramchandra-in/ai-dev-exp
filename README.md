@@ -80,7 +80,7 @@ ai-dev-exp anthropic-rate-brief
 ai-dev-exp anthropic-rate-brief --format json
 ```
 
-Optional **status bar:** install the extension under `editors/cursor-anthropic-rate/` (open folder in Cursor → **Run → Install Extension from Location**, or package with `vsce` and install the `.vsix`). It re-runs `anthropic-rate-brief` on an interval (each refresh uses one small Haiku request).
+Optional **Cursor status bar:** if you use **Cursor** (not plain VS Code), you can load the small add-on under `editors/cursor-anthropic-rate/` via **Cursor → Extensions → Install from Folder** (or build a `.vsix` with the VS Code packaging tool if you use that workflow). It re-runs `anthropic-rate-brief` on an interval (each refresh uses one small Haiku request). **If you prefer not to install any extension**, run `ai-dev-exp anthropic-rate-brief` from a terminal, a shell alias, or a **Task** when you want a reading—same data, no status bar.
 
 See the **`usage-limits`** Cursor skill for the full Claude vs Cursor vs API picture.
 
