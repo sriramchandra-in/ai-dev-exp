@@ -78,6 +78,8 @@ pip install -e ".[dev]"
 pytest
 ```
 
+CI (same shape as **isrc-modern**’s test job: Python 3.12 on Ubuntu) runs on push and pull requests to `main`: **ruff**, **mypy**, **pytest**, and a **wheel** build. See `.github/workflows/ci.yml`.
+
 Editable installs read skills from repo-root `claude/` and `cursor/`. Wheels ship a copy under `ai_dev_exp/_bundled/` so `pip install` works without the git tree.
 
 ## License

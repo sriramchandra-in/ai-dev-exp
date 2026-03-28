@@ -1,0 +1,53 @@
+# ══════════════════════════════════════════════════════════════════
+# GitHub Actions — CI for ai-dev-exp
+#
+# Aligned with the isrc-modern "Test" job pattern: checkout, Python 3.12,
+# install dependencies, then run checks. No deploy (this repo is a Python
+# package + skill bundles, not the Django/VPS stack).
+#
+# Triggers: push and pull_request to main.
+# ══════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install build
+
+      - name: Ruff lint
+        run: ruff check src tests
+
+      - name: Ruff format
+        run: ruff format --check src tests
+
+      - name: Mypy
+        run: mypy src/ai_dev_exp
+
+      - name: Pytest
+        run: pytest
+
+      - name: Build wheel
+        run: python -m build --wheel
