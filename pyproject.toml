@@ -44,6 +44,10 @@ Repository = "https://github.com/sriramchandra-in/ai-dev-exp"
 [tool.hatch.build.targets.wheel]
 packages = ["src/ai_dev_exp"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"claude" = "ai_dev_exp/_bundled/claude"
+"cursor" = "ai_dev_exp/_bundled/cursor"
+
 [tool.ruff]
 target-version = "py310"
 line-length = 100
