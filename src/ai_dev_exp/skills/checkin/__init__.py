@@ -26,8 +26,12 @@ At the start of any coding session, or when the user switches to a new project d
 
 2. **Check staleness** — Run `codex-tree check --format json` for a machine-readable
    staleness report. This compares `version.json` source_commit against HEAD, verifies
-   content hashes per file, and reports which files are clean vs stale vs untracked.
-   - If stale files exist, suggest `codex-tree update` to refresh.
+   SHA-256 content hashes per file, and classifies each as:
+   - `Modified` — content hash mismatch (file changed since tree was generated)
+   - `Untracked` — file exists on disk but has no module index
+   - `Deleted` — module index exists but file is gone
+   The JSON output includes `commits_behind`, `stale_files`, `clean_files`, and `is_stale`.
+   - If stale: suggest `codex-tree update` to refresh incrementally.
    - Note stale files for lazy raw-source exploration.
 
 3. **Load context** — Read the appropriate detail level based on the task and model:
@@ -39,9 +43,15 @@ At the start of any coding session, or when the user switches to a new project d
 
 4. **Load intent** — If `.codex-tree/intent/` exists, read it for deeper understanding:
    - `intent/decisions.json` — design decisions anchored to specific files/symbols,
-     with confidence scores (0.0–1.0) and provenance (inferred_from_code, extracted_from_docs, etc.)
+     with confidence scores (0.0–1.0) and provenance markers.
    - `intent/patterns.json` — cross-cutting design patterns observed across the codebase.
-   - Trust decisions with confidence >= 0.7. For lower confidence, verify against source.
+   - **Confidence guide:**
+     - 0.7–1.0: trust directly (extracted from docs or high-certainty inference)
+     - 0.4–0.6: plausible but verify against source before acting on it
+     - 0.1–0.3: speculative — treat as a hypothesis, not a fact
+   - **Provenance types:** `extracted_from_docs`, `extracted_from_commit`,
+     `inferred_from_code`, `human_annotated`
+   - Intent results are cached by content hash — re-running with unchanged files is free.
    - If intent layer doesn't exist (generated with `--no-intent`), rely on AST layer only.
 
 5. **Establish understanding** — Summarize what you know about the project in 2-3 sentences.
@@ -67,33 +77,74 @@ These commands are available when `codex-tree` is installed:
 |---------|---------|
 | `codex-tree init` | Generate `.codex-tree/` from scratch |
 | `codex-tree update` | Incremental delta from git changes |
-| `codex-tree regen` | Full rebuild (new generation) |
+| `codex-tree regen` | Full rebuild (new generation, increments counter) |
 | `codex-tree check` | Staleness report (clean vs stale files) |
 | `codex-tree report` | Token savings and tree statistics |
 
-Key flags:
+### Flags by command
+
+**init / regen:**
 - `--no-intent` — skip AI intent layer (no API key needed)
 - `--no-claude` — skip Claude optimization layer
-- `--format json` — machine-readable output (check, report)
-- `--fail-if-stale` — exit code 1 if stale (useful in CI)
+- `--languages <list>` — comma-separated languages to parse (default: all supported)
+- `--dry-run` — show what would be generated without writing (init only)
+
+**update:**
+- `--no-intent` — skip AI intent analysis for changed files
+- `--no-claude` — skip Claude layer regeneration
+- `--no-compact` — skip auto-compaction even if thresholds are met
+
+**check:**
+- `--format json` — machine-readable output
+- `--fail-if-stale` — exit code 1 if any files are stale (useful in CI)
+
+**report:**
+- `--format json` — machine-readable output
+
+**Global:** `--path <dir>` (default: `.`), `-v/--verbose`, `-q/--quiet`
+
+### Environment variables
+
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `ANTHROPIC_API_KEY` | For intent layer | — | Claude API authentication |
+| `CODEX_TREE_MODEL` | No | `claude-sonnet-4-20250514` | Model for intent analysis |
+| `CODEX_TREE_BUDGET` | No | Unlimited | Max tokens for intent API calls |
+
+Without `ANTHROPIC_API_KEY`, intent/claude layers are skipped with a warning (not an error).
 
 ## Tree structure reference
 
 ```
 .codex-tree/
-  version.json          # Tree version (generation.delta_count), stats
-  tree.json             # Top-level structure map (files + directories)
+  version.json          # Tree version (generation.delta_count), stats, source_commit
+  tree.json             # Top-level structure map (files + directories with aggregate counts)
   modules/{path}/       # Per-file structural detail
-    index.json          #   symbols, imports, exports, content_hash
-  intent/               # AI-generated semantic layer (optional)
+    index.json          #   symbols, imports, exports, content_hash (SHA-256)
+  intent/               # AI-generated semantic layer (optional, needs API key)
     decisions.json      #   design decisions with confidence + provenance
     patterns.json       #   cross-cutting patterns
-  claude/               # Claude-optimized summaries (optional)
-    l1.md               #   ~500 tokens — project overview
-    l2.md               #   ~2,000 tokens — module detail
-    l3.md               #   full detail
-  deltas/               # Incremental updates (auto-compacted)
+    .cache/             #   content-hash-based cache (avoids redundant API calls)
+  claude/               # Claude-optimized summaries (optional, generated locally)
+    l1.md               #   ~500 tokens — stats, architecture, entry points, key types
+    l2.md               #   ~2K tokens  — L1 + per-module symbols, dependency graph, patterns
+    l3.md               #   full detail — L2 + all symbols, full decisions, import/export manifests
+  deltas/               # Incremental updates (auto-compacted at 10 deltas or 100KB)
 ```
+
+### Compaction
+
+Deltas are auto-compacted when either threshold is met:
+- **10 deltas** accumulated, OR
+- **100 KB** total delta size
+
+Compaction folds all deltas into the base tree and resets the counter.
+Use `--no-compact` on `update` to defer compaction (e.g., during rapid iteration).
+
+### Excluded directories
+
+`init` and `regen` skip: `.git`, `target`, `.codex-tree`, `node_modules`,
+`__pycache__`, `.venv`, `vendor`, `dist`, `build`.
 
 ## Output
 
