@@ -1,6 +1,6 @@
 # Token optimization — reference
 
-Bundled with **ai-dev-exp** (`cursor/skills/token-optimization/`). Cursor-focused optional depth; terminal reports use **`ai-dev-exp cursor-context`** and **`anthropic-rate-brief`**.
+Bundled with **ai-dev-exp** (`cursor/skills/token-optimization/`). Terminal reporting here is **`ai-dev-exp cursor-context`** only.
 
 ## Reply and log shape
 
@@ -125,4 +125,4 @@ Used only in repositories where the **codex-tree** tool generated `.codex-tree/`
 - `codex-tree check --format json` — staleness; do not trust digests for paths reported stale without reading source.
 - `codex-tree report` — heuristic token estimates (raw vs tree vs tree + digest markdown).
 
-Digest **folder names** (`claude/` vs `cursor/`) reflect generator output layout, not a mandate to use a particular IDE—they are two equivalent tiered views of the same tree.
+The codex-tree generator may write more than one digest directory on disk; in Cursor use **`.codex-tree/cursor/`** when present.

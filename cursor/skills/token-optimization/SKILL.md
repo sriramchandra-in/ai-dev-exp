@@ -24,13 +24,9 @@ Run from the **project git root**:
 ai-dev-exp cursor-context
 ai-dev-exp cursor-context --brief
 ai-dev-exp cursor-context --format json
-
-# API rate buckets — only if ANTHROPIC_API_KEY is set (BYOK); not Cursor subscription
-ai-dev-exp anthropic-rate-brief
-ai-dev-exp anthropic-rate-brief --format json
 ```
 
-**Cursor subscription / Composer quotas** are only in **Cursor Settings**; this CLI cannot read them.
+**Cursor subscription / Composer quotas** are only in **Cursor Settings**; this bundle does not add other usage CLIs.
 
 ## Cursor editor habits
 
@@ -80,7 +76,7 @@ For **scripts and services** you integrate (not Cursor’s hidden billing). Prov
 
 ## Codex-tree in Cursor
 
-If **`.codex-tree/`** exists, prefer **`.codex-tree/cursor/l1.md` → l2 → l3** over raw source until depth demands it. If `cursor/` is missing, fall back to `claude/l*.md` for the same tier.
+If **`.codex-tree/`** exists, prefer **`.codex-tree/cursor/l1.md` → l2 → l3** over raw source until depth demands it. If `cursor/` is missing, use the only other digest `l*.md` set under `.codex-tree/` if present (same tiering).
 
 **Staleness:** `codex-tree check --format json`. **Estimates:** `codex-tree report` or **`ai-dev-exp cursor-context`**.
 

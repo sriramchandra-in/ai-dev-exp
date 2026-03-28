@@ -36,7 +36,7 @@ At the start of any coding session, or when the user switches to a new project d
 
    Use **`@`** to attach files, respect **`.cursor/rules`**, and escalate digest tier when the task needs more structure.
 
-   If **`cursor/`** is missing (e.g. tree built with `--no-cursor`) but **`claude/`** exists on disk, use **`.codex-tree/claude/l{1,2,3}.md`** for the same tier—the structural body matches; only the opening notes differ.
+   If **`cursor/`** is missing (e.g. tree built with `--no-cursor`) but another digest directory exists under `.codex-tree/`, use its **`l1.md` / `l2.md` / `l3.md`** for the same tier (structure matches; preambles differ).
 
    **If neither digest exists** — fall back to `tree.json` plus key `modules/{path}/index.json` files.
 
@@ -90,21 +90,21 @@ Heuristic token estimates vs reading all indexed source. In Cursor, prioritize *
 - **Tree only** — `tree.json` + all `modules/**/index.json`.
 - **Tree + Cursor** — tree plus `cursor/l2.md` (or `l1.md` if L2 missing).
 
-JSON (`--format json`) also includes Claude-digest fields for tooling; use **`tree_plus_cursor_tokens`**, **`cursor_digest_used`**, **`savings_tree_plus_cursor`** for Cursor-focused automation (e.g. `ai-dev-exp cursor-context`).
+JSON (`--format json`) includes multiple strategies; for Cursor automation use **`tree_plus_cursor_tokens`**, **`cursor_digest_used`**, **`savings_tree_plus_cursor`** (e.g. `ai-dev-exp cursor-context`).
 
 ### Flags by command
 
 **init / regen:**
-- `--no-intent` — skip AI intent layer (no `ANTHROPIC_API_KEY` needed for AST-only trees)
-- `--no-claude` — skip Claude digest layer (`claude/l1.md`–`l3.md`)
-- `--no-cursor` — skip Cursor digest layer (`cursor/l1.md`–`l3.md`; same structure as Claude + Cursor preamble)
+- `--no-intent` — skip optional semantic intent layer (AST-only trees need no remote analysis key)
+- `--no-claude` — skip non-Cursor digest export (codex-tree flag; directory name is tool-defined)
+- `--no-cursor` — skip `.codex-tree/cursor/` digest layer
 - `--languages <list>` — comma-separated languages to parse (default: all supported)
 - `--dry-run` — show what would be generated without writing (init only)
 
 **update:**
-- `--no-intent` — skip AI intent analysis for changed files
-- `--no-claude` — skip Claude layer regeneration
-- `--no-cursor` — skip Cursor layer regeneration
+- `--no-intent` — skip intent analysis for changed files
+- `--no-claude` — skip non-Cursor digest regeneration
+- `--no-cursor` — skip Cursor digest regeneration
 - `--no-compact` — skip auto-compaction even if thresholds are met
 
 **check:**
@@ -117,18 +117,13 @@ JSON (`--format json`) also includes Claude-digest fields for tooling; use **`tr
 
 **Global:** `--path <dir>` (default: `.`), `-v/--verbose`, `-q/--quiet`
 
-### Environment variables
+### Environment variables (optional intent layer)
 
-| Variable | Required | Default | Purpose |
-|----------|----------|---------|---------|
-| `ANTHROPIC_API_KEY` | For intent layer only | — | Claude API authentication (intent JSON). Not used for `claude/` or `cursor/` markdown. |
-| `CODEX_TREE_MODEL` | No | `claude-sonnet-4-20250514` | Model for intent analysis |
-| `CODEX_TREE_BUDGET` | No | Unlimited | Max tokens for intent API calls |
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| See **codex-tree** docs | — | Optional keys / model / budget **only** if you generate the **intent** layer. Not used for markdown digests under `cursor/`. |
 
-There is **no codex-tree integration with a “Cursor API key”** — Cursor digest files are built on disk like Claude’s. Using Cursor’s own in-editor AI is separate (Cursor account / optional BYOK in app settings).
-
-Without `ANTHROPIC_API_KEY`, the **intent** layer is skipped with a warning (not an error).
-`claude/` and `cursor/` still generate without any API key.
+Markdown digests under **`.codex-tree/cursor/`** are built **locally** without those keys. **Cursor billing** for in-editor AI is separate (Cursor account / settings).
 
 ## Tree structure reference
 
@@ -138,18 +133,15 @@ Without `ANTHROPIC_API_KEY`, the **intent** layer is skipped with a warning (not
   tree.json             # Top-level structure map (files + directories with aggregate counts)
   modules/{path}/       # Per-file structural detail
     index.json          #   symbols, imports, exports, content_hash (SHA-256)
-  intent/               # AI-generated semantic layer (optional, needs API key)
-    decisions.json      #   design decisions with confidence + provenance
-    patterns.json       #   cross-cutting patterns
-    .cache/             #   content-hash-based cache (avoids redundant API calls)
-  claude/               # Claude-oriented digest (optional, generated locally, no API)
-    l1.md               #   ~500 tokens — stats, architecture, entry points, key types
-    l2.md               #   ~2K tokens  — L1 + per-module symbols, dependency graph, patterns
-    l3.md               #   full detail — L2 + all symbols, full decisions, import/export manifests
-  cursor/               # Same structural digest + Cursor usage preamble (optional, local, no API)
-    l1.md               #   align with claude/l1.md body; front matter + Cursor how-to
-    l2.md               #   align with claude/l2.md
-    l3.md               #   align with claude/l3.md
+  intent/               # Optional semantic layer (see codex-tree docs)
+    decisions.json
+    patterns.json
+    .cache/
+  cursor/               # Cursor digest (local markdown, no editor API)
+    l1.md
+    l2.md
+    l3.md
+  …                     # Other generator outputs may exist; prefer cursor/ in Cursor
   deltas/               # Incremental updates (auto-compacted at 10 deltas or 100KB)
 ```
 

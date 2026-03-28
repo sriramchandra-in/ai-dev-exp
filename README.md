@@ -63,20 +63,6 @@ ai-dev-exp cursor-context --format json
 ai-dev-exp cursor-context --path ~/projects/my-app --brief
 ```
 
-#### Anthropic API rate line (BYOK only)
-
-If you use an **Anthropic API key** (e.g. BYOK), this prints **rate-limit header** utilization — **not** Cursor plan usage:
-
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-ai-dev-exp anthropic-rate-brief
-ai-dev-exp anthropic-rate-brief --format json
-```
-
-**PyCharm:** **Settings → Tools → External Tools** (or Run configurations) with the same command; set **`ANTHROPIC_API_KEY`** in the tool environment.
-
-**Optional:** `editors/cursor-anthropic-rate/` can poll `anthropic-rate-brief` in the **Cursor** (or VS Code) status bar — skip if you only use terminals.
-
 See **`usage-limits`** in the Cursor skill bundle for a short summary.
 
 ## Development

@@ -40,7 +40,7 @@ CURSOR_SKILLS: dict[str, Skill] = {
     ),
     "usage-limits": FileBackedSkill(
         "usage-limits",
-        "Cursor: terminal reports (cursor-context, anthropic-rate-brief); plan UI in Settings.",
+        "Cursor: terminal reports (cursor-context); plan limits in Cursor Settings.",
         variant="cursor",
     ),
 }
