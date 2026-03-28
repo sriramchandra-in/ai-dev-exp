@@ -15,6 +15,10 @@ AVAILABLE_SKILLS: dict[str, Skill] = {
         "deployment",
         "Deployment orchestration: CI/CD, environments, health checks, rollback.",
     ),
+    "token-optimization": FileBackedSkill(
+        "token-optimization",
+        "Claude Code token discipline: compaction, claude/ digests, subagent delegation.",
+    ),
 }
 
 CURSOR_SKILLS: dict[str, Skill] = {

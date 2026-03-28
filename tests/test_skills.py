@@ -12,6 +12,7 @@ def test_all_skills_registered():
     assert "checkin" in AVAILABLE_SKILLS
     assert "github" in AVAILABLE_SKILLS
     assert "deployment" in AVAILABLE_SKILLS
+    assert "token-optimization" in AVAILABLE_SKILLS
 
 
 def test_cursor_skills_registered():
@@ -65,6 +66,24 @@ def test_install_cursor_writes_dot_cursor(tmp_path: Path):
     skill_file = skill.install(str(tmp_path))
     assert skill_file.exists()
     assert (tmp_path / ".cursor" / "skills" / "token-optimization" / "reference.md").is_file()
+
+
+def test_install_claude_token_optimization_with_reference(tmp_path: Path):
+    skill = AVAILABLE_SKILLS["token-optimization"]
+    skill_file = skill.install(str(tmp_path))
+    assert skill_file.exists()
+    assert (tmp_path / ".claude" / "skills" / "token-optimization" / "reference.md").is_file()
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["checkin", "github", "deployment", "token-optimization"],
+)
+def test_claude_skill_install_roundtrip(tmp_path: Path, name: str):
+    skill = AVAILABLE_SKILLS[name]
+    skill.install(str(tmp_path))
+    md = (tmp_path / ".claude" / "skills" / name / "SKILL.md").read_text(encoding="utf-8")
+    assert len(md) > 50
 
 
 @pytest.mark.parametrize(
