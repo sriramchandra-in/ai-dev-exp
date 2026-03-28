@@ -157,7 +157,7 @@ def format_brief(snapshot: dict[str, Any]) -> str:
 def format_report_text(snapshot: dict[str, Any]) -> str:
     """Multi-line summary for end-of-session or checkpoint paste."""
     lines: list[str] = [
-        "Cursor context snapshot (codex-tree — repo strategy, not chat tokens)",
+        "codex-tree context report (repo strategy, not Cursor plan usage) — stdout / terminal",
         f"Path: {snapshot['path']}",
         "",
     ]

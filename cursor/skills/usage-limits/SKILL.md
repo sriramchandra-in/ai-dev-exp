@@ -1,51 +1,38 @@
 ---
 name: usage-limits
 description: >-
-  Explains Claude Code vs API vs Cursor usage: 5h/7d statusline JSON,
-  anthropic-rate-brief for terminal/PyCharm, optional Cursor/VS Code status-bar
-  add-on, and Cursor subscription UI limits.
+  Cursor-focused usage reporting: run ai-dev-exp in the terminal (Cursor or
+  PyCharm) for codex-tree context and optional API rate headers; Cursor plan
+  quotas stay in Settings. Optional editor status-bar add-on for those who want it.
 ---
 
-# Usage limits (Claude Code vs API vs editors)
+# Usage limits (Cursor + terminal)
 
-## What differs
+## What you can print in the terminal
 
-| Source | Session / weekly style limits | Where it shows |
-|--------|-------------------------------|----------------|
-| **Claude Code** | `rate_limits.five_hour` and `seven_day` (`used_percentage`) | Piped into `~/.claude/statusline-command.py` as JSON on stdin |
-| **Anthropic API** (direct / BYOK) | RPM / tokens-per-minute buckets (response headers) | **`ai-dev-exp anthropic-rate-brief`** in any terminal, PyCharm External Tool, etc. |
-| **Cursor subscription** | Composer / plan quotas | Cursor **Settings →** usage / billing — **not** exposed to this CLI |
-| **VS Code / Cursor extension** | Same as API line above | Optional add-on `editors/cursor-anthropic-rate/` (polls the CLI) |
+| Report | Command | Needs |
+|--------|---------|--------|
+| **Repo context vs raw** (codex-tree) | `ai-dev-exp cursor-context` / `--brief` / `--format json` | `codex-tree` on `PATH`, `.codex-tree/` |
+| **API rate buckets** (BYOK) | `ai-dev-exp anthropic-rate-brief` / `--format json` | `ANTHROPIC_API_KEY` in the shell |
 
-Claude Code **cannot** feed its statusline JSON into PyCharm or a plain terminal; use **`anthropic-rate-brief`** for API bucket utilization instead.
+Run these from **Cursor’s integrated terminal** or **PyCharm’s terminal** (same commands). For PyCharm **External Tools**, set the program to `ai-dev-exp` and arguments to `cursor-context --brief` or `anthropic-rate-brief`, with working directory = git root and env vars as needed.
 
-## Terminal + PyCharm (recommended for non-Cursor workflows)
+## What you cannot get from the CLI
 
-1. Export **`ANTHROPIC_API_KEY`** in the shell (or in PyCharm **Run configuration → Environment** / **External Tool → Environment**).
-2. Run:
-   ```bash
-   ai-dev-exp anthropic-rate-brief
-   ai-dev-exp anthropic-rate-brief --format json
-   ```
-3. **PyCharm External Tool** example: Program `ai-dev-exp`, Arguments `anthropic-rate-brief`, working directory optional.
+- **Cursor subscription / Composer / plan usage** — only **Cursor Settings →** billing or usage UI.
+- **Exact chat token counts** per message — not exposed for terminal scripts.
 
-**Cost:** Each run sends one minimal Messages request (default model **`claude-haiku-4-5`**, overridable with **`ANTHROPIC_USAGE_PROBE_MODEL`**).
+## Optional: status bar (Cursor or VS Code)
 
-## Optional: Cursor or VS Code status bar
+Folder **`editors/cursor-anthropic-rate/`** polls **`anthropic-rate-brief`** on a timer. **Skip** if you only want **terminal** output.
 
-Install **`ai-dev-exp/editors/cursor-anthropic-rate/`** via **Install from Folder** or a **`.vsix`** (VS Code-compatible manifest; works in **Cursor** too). Same data as the CLI, refreshed on a timer. Skip entirely if you only use **terminal + PyCharm**.
+## Notes on `anthropic-rate-brief`
 
-## Claude Code workflow (unchanged)
+- Shows **Messages API** rate-limit headers (approx. % of bucket used), **not** “weekly Pro” style product windows.
+- Each run sends one **small** API probe (default Haiku-class model; override with **`ANTHROPIC_USAGE_PROBE_MODEL`**).
 
-Keep **`~/.claude/settings.json`** pointing at **`statusline-command.py`**. That script reads **`rate_limits`** from Claude Code’s JSON.
+## When the user asks for numbers
 
-## Alignment with “session / weekly” wording
-
-- **5h / 7d** are **Claude Code product** signals, not returned by public Messages API headers.
-- **`anthropic-rate-brief`** is **API rate-limit bucket utilization** (approx. % consumed from remaining vs limit). Not “weekly Pro quota.”
-
-## When the user asks for parity
-
-- **PyCharm / terminal only:** **`anthropic-rate-brief`** + explain 5h/7d stay in Claude Code.
-- **Cursor without BYOK:** Cursor’s own usage UI; this CLI cannot read it.
-- **BYOK / API:** CLI (and optional editor add-on).
+- **Cursor-only billing** → Settings UI.
+- **Repo context strategy** → `cursor-context`.
+- **BYOK API pressure** → `anthropic-rate-brief` in terminal.

@@ -1,6 +1,6 @@
 # Token optimization — reference
 
-Bundled with **ai-dev-exp** at `cursor/skills/token-optimization/`. Optional depth; read when implementing APIs, automation, or when the user wants explicit cost/context discipline.
+Bundled with **ai-dev-exp** (`cursor/skills/token-optimization/`). Cursor-focused optional depth; terminal reports use **`ai-dev-exp cursor-context`** and **`anthropic-rate-brief`**.
 
 ## Reply and log shape
 
@@ -19,12 +19,11 @@ Bundled with **ai-dev-exp** at `cursor/skills/token-optimization/`. Optional dep
 - Re-read only what drifted; do not re-ingest unchanged files between turns.
 - When delegating to subagents or subprocesses: minimal specs; require **summarized** returns, not raw dumps.
 
-## Context compaction (session detail)
+## Context compaction (Cursor)
 
-- **Cadence:** After a milestone (feature done, tests green, PR ready), offer a **one-screen summary** and optional **host compact/clear** so the next segment starts lean.
-- **Claude Code–style clients:** User may run `/compact` or equivalent; your job is to **name the breakpoint** and **produce the summary text** they can keep after compaction.
-- **IDE chats without compact:** You still **self-compact** in replies—shorter turns, no repeat of long stderr, pointer to “see summary above.”
-- **Risk:** Do not compact away **safety constraints**, **unmerged blockers**, or **exact versions** the user still needs; put those in the summary explicitly.
+- **Cadence:** After a milestone, offer a **one-screen summary** and suggest **Cursor** compact / new chat when the product supports it.
+- **Always:** Shorter turns, no repeat of long stderr; point to “summary above.”
+- **Risk:** Keep **safety constraints**, **blockers**, and **exact versions** in the summary explicitly.
 
 ## Skills and rules
 

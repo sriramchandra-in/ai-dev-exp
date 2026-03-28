@@ -1,9 +1,9 @@
 ---
 name: checkin
 description: >-
-  Load the codex-tree knowledge tree into the AI session for instant codebase
-  context (Cursor primary; Claude digest equivalent). Use at the start of every
-  conversation or when switching projects.
+  Load the codex-tree knowledge tree for Cursor (Chat / Composer / Agent) using
+  `.codex-tree/cursor/` digests. Use at the start of every session or when
+  switching projects.
 ---
 
 # Checkin
@@ -28,28 +28,19 @@ At the start of any coding session, or when the user switches to a new project d
    - If stale: suggest `codex-tree update` to refresh incrementally.
    - Note stale files for lazy raw-source exploration.
 
-3. **Load context** — Pick the digest path for the environment, then the depth tier:
+3. **Load context** — In **Cursor**, use **`.codex-tree/cursor/`** and pick the depth tier:
 
-   **In Cursor (Chat / Composer / Agent)** — prefer `.codex-tree/cursor/`:
-   - Quick orientation / small edits: `.codex-tree/cursor/l1.md` (~500 tokens of structure + Cursor preamble)
-   - Feature work (public APIs, imports, intent patterns in L2): `cursor/l2.md` (~2,000 tokens)
-   - Refactors / architecture (all symbols, decisions, import/export detail): `cursor/l3.md`
-   - These files mirror the **same structural body** as `claude/l*.md`; only the opening
-     **Cursor usage guide** differs (e.g. `@` file attachment, `.cursor/rules`, when to escalate).
-   - If `cursor/` is missing (e.g. tree built with `--no-cursor`) but `claude/` exists, use
-     `.codex-tree/claude/l1.md` / `l2.md` / `l3.md` instead — content is aligned.
+   - Quick orientation / small edits: `.codex-tree/cursor/l1.md`
+   - Feature work (APIs, imports, patterns in L2): `.codex-tree/cursor/l2.md`
+   - Refactors / architecture (full symbols, imports/exports): `.codex-tree/cursor/l3.md`
 
-   **In Claude Code / Anthropic clients** — prefer `.codex-tree/claude/`:
-   - Quick tasks / Haiku: `claude/l1.md`
-   - Implementation / Sonnet: `claude/l2.md`
-   - Architecture / Opus: `claude/l3.md`
-   - If `claude/` is missing but `cursor/` exists, use `cursor/l*.md` (skip the preamble if you want only structure).
+   Use **`@`** to attach files, respect **`.cursor/rules`**, and escalate digest tier when the task needs more structure.
 
-   **If neither digest exists** — fall back to `tree.json` for overview + key
-   `modules/{path}/index.json` files for detail.
+   If **`cursor/`** is missing (e.g. tree built with `--no-cursor`) but **`claude/`** exists on disk, use **`.codex-tree/claude/l{1,2,3}.md`** for the same tier—the structural body matches; only the opening notes differ.
 
-   **No extra API key** is required to read or generate `cursor/` or `claude/`; both are produced
-   locally from the AST tree plus optional cached intent JSON.
+   **If neither digest exists** — fall back to `tree.json` plus key `modules/{path}/index.json` files.
+
+   Reading or generating these digests needs **no API key** (intent layer is separate).
 
 4. **Load intent** — If `.codex-tree/intent/` exists, read it for deeper understanding:
    - `intent/decisions.json` — design decisions anchored to specific files/symbols,
@@ -93,18 +84,13 @@ These commands are available when `codex-tree` is installed:
 
 ### `codex-tree report` output
 
-Text mode prints **context strategies** (heuristic token estimates vs reading all indexed source):
+Heuristic token estimates vs reading all indexed source. In Cursor, prioritize **Tree + Cursor** (digest `cursor/l2.md` or `l1.md`).
 
-- **Nothing (raw source only)** — baseline; no codex-tree context.
+- **Nothing (raw source only)** — baseline.
 - **Tree only** — `tree.json` + all `modules/**/index.json`.
-- **Tree + Claude** — tree plus `claude/l2.md` (or `l1.md` if L2 missing).
 - **Tree + Cursor** — tree plus `cursor/l2.md` (or `l1.md` if L2 missing).
 
-Each line includes **% vs raw** (savings vs baseline). JSON (`--format json`) exposes
-`token_estimate.just_tree_tokens`, `tree_plus_claude_tokens`, `claude_digest_used`,
-`tree_plus_cursor_tokens`, `cursor_digest_used`,
-`savings_just_tree`, `savings_tree_plus_claude`, `savings_tree_plus_cursor`,
-plus legacy module-only fields.
+JSON (`--format json`) also includes Claude-digest fields for tooling; use **`tree_plus_cursor_tokens`**, **`cursor_digest_used`**, **`savings_tree_plus_cursor`** for Cursor-focused automation (e.g. `ai-dev-exp cursor-context`).
 
 ### Flags by command
 

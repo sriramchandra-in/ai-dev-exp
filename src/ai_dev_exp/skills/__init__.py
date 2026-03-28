@@ -35,12 +35,12 @@ CURSOR_SKILLS: dict[str, Skill] = {
     ),
     "token-optimization": FileBackedSkill(
         "token-optimization",
-        "Token/API cost optimization: context, caching, batching, codex-tree, aggregation.",
+        "Cursor token discipline: compaction, cursor/ digests, terminal ai-dev-exp reports.",
         variant="cursor",
     ),
     "usage-limits": FileBackedSkill(
         "usage-limits",
-        "Claude vs Cursor usage: API rate line, status bar extension, 5h/7d limits explained.",
+        "Cursor: terminal reports (cursor-context, anthropic-rate-brief); plan UI in Settings.",
         variant="cursor",
     ),
 }

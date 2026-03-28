@@ -86,10 +86,11 @@ def install(skill_name: str | None, target: str | None, cursor: bool) -> None:
     help="One line only (terminal status, Cursor status bar text, quick paste).",
 )
 def cursor_context(project_path: Path, out_fmt: str, brief: bool) -> None:
-    """Snapshot codex-tree staleness + token estimates (Cursor-focused).
+    """Print codex-tree staleness + token estimates to stdout.
 
-    Measures repo context strategy (tree vs digest vs raw), not Cursor chat usage.
-    Requires `codex-tree` on PATH and a `.codex-tree/` directory.
+    For Cursor’s terminal or PyCharm’s terminal. Measures repo context strategy
+    (tree vs cursor digest vs raw), not Cursor subscription usage.
+    Requires `codex-tree` on PATH and `.codex-tree/`.
     """
     snap = gather_snapshot(project_path)
     if out_fmt == "json":
@@ -110,9 +111,9 @@ def cursor_context(project_path: Path, out_fmt: str, brief: bool) -> None:
     show_default=True,
 )
 def anthropic_rate_brief(out_fmt: str) -> None:
-    """One line from Anthropic API rate-limit headers (BYOK / API key).
+    """Print Anthropic API rate-limit header summary to stdout (BYOK / API key).
 
-    Not Claude Code 5h/7d windows and not Cursor subscription usage.
+    Run in Cursor’s terminal or PyCharm’s terminal. Not Cursor plan/billing usage.
     Sends a minimal Messages request (default Haiku). Requires ANTHROPIC_API_KEY.
     """
     snap = build_snapshot()

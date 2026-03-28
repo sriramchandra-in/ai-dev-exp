@@ -46,33 +46,26 @@ ai-dev-exp install checkin
 ai-dev-exp install token-optimization --cursor
 ```
 
-### Cursor context snapshot (codex-tree)
+### Terminal reports (Cursor + PyCharm)
 
-For repos that use **codex-tree**, you can print **measurable** context-strategy numbers (tree vs raw vs Cursor digest). This does **not** read Cursor chat token usage; it runs `codex-tree check` and `codex-tree report`.
+These commands print to **stdout** — use **Cursor’s integrated terminal**, **PyCharm’s terminal**, or any shell. They do **not** read Cursor subscription / Composer quotas (those stay in **Cursor Settings**).
+
+#### Codex-tree context snapshot
+
+Needs **`codex-tree` on `PATH`** and **`.codex-tree/`** (see **checkin**).
 
 ```bash
-cd /path/to/your/repo   # git root with .codex-tree/
+cd /path/to/your/repo   # git root
 
-# End-of-session or checkpoint (multi-line, paste into notes or chat)
-ai-dev-exp cursor-context
-
-# One line — quick check, log line, or manual status-bar text in Cursor
-ai-dev-exp cursor-context --brief
-
-# JSON for scripts or dashboards
+ai-dev-exp cursor-context              # multi-line report
+ai-dev-exp cursor-context --brief      # one line
 ai-dev-exp cursor-context --format json
-
-# Another project root
 ai-dev-exp cursor-context --path ~/projects/my-app --brief
 ```
 
-Requires **`codex-tree` on `PATH`** and a **`.codex-tree/`** directory (see the **checkin** skill).
+#### Anthropic API rate line (BYOK only)
 
-Cursor does not expose chat token metrics to extensions; **`--brief`** is meant to be run from the integrated terminal (or a Task) and pasted or glanced at—there is no automatic status-bar hook from this package alone.
-
-### Anthropic API rate line (BYOK / API key)
-
-Claude Code’s **5h / 7d** percentages come from **Claude Code’s** statusline JSON, not from the public API. This package can print **Messages API rate-limit headers** from any shell (**not** Cursor subscription usage):
+If you use an **Anthropic API key** (e.g. BYOK), this prints **rate-limit header** utilization — **not** Cursor plan usage:
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -80,13 +73,11 @@ ai-dev-exp anthropic-rate-brief
 ai-dev-exp anthropic-rate-brief --format json
 ```
 
-**Terminal (default):** use your system terminal, **PyCharm’s terminal**, a shell alias, `cron`, or CI—whatever runs `ai-dev-exp` with the key in the environment.
+**PyCharm:** **Settings → Tools → External Tools** (or Run configurations) with the same command; set **`ANTHROPIC_API_KEY`** in the tool environment.
 
-**PyCharm:** **Settings → Tools → External Tools** (or a **Run/Debug** configuration) can run the same command; ensure **`ANTHROPIC_API_KEY`** is set in the tool env or in the IDE’s environment.
+**Optional:** `editors/cursor-anthropic-rate/` can poll `anthropic-rate-brief` in the **Cursor** (or VS Code) status bar — skip if you only use terminals.
 
-**Optional editor status bar (Cursor or VS Code):** load `editors/cursor-anthropic-rate/` via **Install from Folder** / `.vsix` if you use those editors; it polls the same CLI on an interval.
-
-See the **`usage-limits`** skill for Claude vs API vs Cursor billing.
+See **`usage-limits`** in the Cursor skill bundle for a short summary.
 
 ## Development
 
