@@ -20,15 +20,28 @@ You are assisting someone working in **Claude Code** (CLI, desktop, or IDE exten
 Run via Bash tool from the **project git root**:
 
 ```bash
+# Session token usage report (needs token-log-hook active)
+ai-dev-exp token-report              # full breakdown by category
+ai-dev-exp token-report --brief      # one-line summary
+ai-dev-exp token-report --format json
+
 # Repo context strategy (needs codex-tree + .codex-tree/)
 ai-dev-exp cursor-context            # works for any host; reports tree + digest stats
 ai-dev-exp cursor-context --brief
-ai-dev-exp cursor-context --format json
 
 # Anthropic API rate-limit snapshot (needs ANTHROPIC_API_KEY)
 ai-dev-exp anthropic-rate-brief
-ai-dev-exp anthropic-rate-brief --format json
 ```
+
+### Hook setup
+
+To enable session tracking, run once per project:
+
+```bash
+ai-dev-exp setup-hooks               # adds PostToolUse hook to .claude/settings.json
+```
+
+**Suggest running `ai-dev-exp token-report --brief` at milestones** (after completing a feature, before compaction). Offer the full report at session end.
 
 ## Claude Code habits
 

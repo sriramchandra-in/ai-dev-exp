@@ -36,6 +36,7 @@ dev = [
 
 [project.scripts]
 ai-dev-exp = "ai_dev_exp.cli:main"
+token-log-hook = "ai_dev_exp.token_hook:main"
 
 [project.urls]
 Homepage = "https://github.com/sriramchandra-in/ai-dev-exp"

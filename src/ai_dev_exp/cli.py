@@ -9,6 +9,13 @@ from ai_dev_exp import __version__
 from ai_dev_exp.anthropic_rate import build_snapshot, format_brief_line
 from ai_dev_exp.cursor_context import format_brief, format_report_text, gather_snapshot
 from ai_dev_exp.skills import AVAILABLE_SKILLS, CURSOR_SKILLS
+from ai_dev_exp.token_report import (
+    build_report,
+    format_brief as token_brief,
+    format_json as token_json,
+    format_report_text as token_report_text,
+    load_entries,
+)
 
 
 @click.group()
@@ -121,3 +128,90 @@ def anthropic_rate_brief(out_fmt: str) -> None:
         click.echo(json.dumps(snap, indent=2))
         return
     click.echo(format_brief_line(snap))
+
+
+@main.command("token-report")
+@click.option(
+    "--path",
+    "project_path",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=Path("."),
+    help="Project root containing .claude/token-log.jsonl.",
+)
+@click.option(
+    "--format",
+    "out_fmt",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    show_default=True,
+)
+@click.option("--brief", is_flag=True, help="One-line summary.")
+@click.option("--session", "session_id", default=None, help="Session ID (default: latest).")
+def token_report(project_path: Path, out_fmt: str, brief: bool, session_id: str | None) -> None:
+    """Print token usage report from .claude/token-log.jsonl.
+
+    Requires the token-log-hook to be active (see: ai-dev-exp setup-hooks).
+    """
+    log_file = project_path / ".claude" / "token-log.jsonl"
+    entries = load_entries(log_file)
+    if not entries:
+        click.echo("No token log found. Run 'ai-dev-exp setup-hooks' first.", err=True)
+        raise SystemExit(1)
+    report = build_report(entries, session_id=session_id)
+    if out_fmt == "json":
+        click.echo(json.dumps(token_json(report), indent=2))
+        return
+    if brief:
+        click.echo(token_brief(report))
+        return
+    click.echo(token_report_text(report))
+
+
+@main.command("setup-hooks")
+@click.option(
+    "--target",
+    type=click.Path(file_okay=False, dir_okay=True, path_type=Path),
+    default=Path("."),
+    help="Project root where .claude/settings.json will be updated.",
+)
+def setup_hooks(target: Path) -> None:
+    """Configure Claude Code PostToolUse hook for token usage logging.
+
+    Adds the token-log-hook entry to .claude/settings.json (or creates it).
+    The hook runs async and never blocks your session.
+    """
+    settings_file = target / ".claude" / "settings.json"
+    settings: dict = {}
+    if settings_file.is_file():
+        try:
+            settings = json.loads(settings_file.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    hook_entry = {
+        "matcher": "",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "token-log-hook",
+                "timeout": 10,
+            }
+        ],
+    }
+
+    hooks = settings.setdefault("hooks", {})
+    post_tool = hooks.setdefault("PostToolUse", [])
+
+    # Don't duplicate if already present.
+    for existing in post_tool:
+        for h in existing.get("hooks", []):
+            if h.get("command") == "token-log-hook":
+                click.echo("Hook already configured.")
+                return
+
+    post_tool.append(hook_entry)
+
+    settings_file.parent.mkdir(parents=True, exist_ok=True)
+    settings_file.write_text(json.dumps(settings, indent=2) + "\n", encoding="utf-8")
+    click.echo(f"Hook added to {settings_file}")
+    click.echo("Token usage will be logged to .claude/token-log.jsonl")
